@@ -20,4 +20,84 @@
 {
   "imports": {
     "three":                                    "https://cdn.jsdelivr.net/npm/three/build/three.module.js",
-    "@photo-sphere-viewer/core":                "https://cd
+    "@photo-sphere-viewer/core":                "https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core/index.module.js",
+    "@photo-sphere-viewer/markers-plugin":      "https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/markers-plugin/index.module.js",
+    "@photo-sphere-viewer/virtual-tour-plugin": "https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/virtual-tour-plugin/index.module.js"
+  }
+}
+</script>
+
+<script type="module">
+  import { Viewer }            from '@photo-sphere-viewer/core';
+  import { MarkersPlugin }     from '@photo-sphere-viewer/markers-plugin';
+  import { VirtualTourPlugin } from '@photo-sphere-viewer/virtual-tour-plugin';
+
+  const viewer = new Viewer({
+    container : document.getElementById('viewer'),
+    // ↓ PAS de panorama ici — VirtualTourPlugin s'en charge via startNodeId
+    navbar    : ['zoom', 'caption', 'fullscreen'],
+
+    plugins: [
+      MarkersPlugin,
+
+      VirtualTourPlugin.withConfig({
+        positionMode : 'manual',
+        renderMode   : '3d',
+        startNodeId  : 'scene-1',   // ← nœud de départ
+
+        nodes: [
+          {
+            id       : 'scene-1',
+            panorama : 'pano1.jpg',
+            caption  : 'Scène 1',
+            links: [
+              {
+                nodeId  : 'scene-2',
+                position: { yaw: '0deg', pitch: '0deg' },
+              },
+            ],
+            markers: [
+              {
+                id      : 'info-scene1',
+                position: { yaw: '90deg', pitch: '0deg' },
+                html    : '📍',
+                size    : { width: 40, height: 40 },
+                tooltip : "Point d'info — scène 1",
+                content : '<h3>Scène 1</h3><p>Texte libre, image, HTML...</p>',
+              },
+            ],
+          },
+
+          {
+            id       : 'scene-2',
+            panorama : 'pano2.jpg',
+            caption  : 'Scène 2',
+            links: [
+              {
+                nodeId  : 'scene-1',   // ← corrigé, plus de doublon
+                position: { yaw: '180deg', pitch: '0deg' },
+              },
+            ],
+            markers: [
+              {
+                id      : 'info-scene2',
+                position: { yaw: '270deg', pitch: '0deg' },
+                html    : '📍',
+                size    : { width: 40, height: 40 },
+                tooltip : "Point d'info — scène 2",
+                content : '<h3>Scène 2</h3><p>Texte libre...</p>',
+              },
+            ],
+          },
+        ],
+      }),
+    ],
+  });
+
+  viewer.addEventListener('click', ({ data }) => {
+    console.log(`yaw: '${Math.round(data.yaw * 180 / Math.PI)}deg',  pitch: '${Math.round(data.pitch * 180 / Math.PI)}deg'`);
+  });
+</script>
+
+</body>
+</html>
