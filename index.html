@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tour PSV</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core/index.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/markers-plugin/index.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/virtual-tour-plugin/index.min.css">
+
+  <style>
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; }
+    #viewer    { width: 100%; height: 100vh; }
+  </style>
+</head>
+<body>
+
+<div id="viewer"></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three":                                    "https://cdn.jsdelivr.net/npm/three/build/three.module.js",
+    "@photo-sphere-viewer/core":                "https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core/index.module.js",
+    "@photo-sphere-viewer/markers-plugin":      "https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/markers-plugin/index.module.js",
+    "@photo-sphere-viewer/virtual-tour-plugin": "https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/virtual-tour-plugin/index.module.js"
+  }
+}
+</script>
+
+<script type="module">
+  import { Viewer }            from '@photo-sphere-viewer/core';
+  import { MarkersPlugin }     from '@photo-sphere-viewer/markers-plugin';
+  import { VirtualTourPlugin } from '@photo-sphere-viewer/virtual-tour-plugin';
+
+  const viewer = new Viewer({
+    container : document.getElementById('viewer'),
+    panorama  : 'pano1.jpg',   // panorama de départ
+    navbar    : ['zoom', 'caption', 'fullscreen'],
+
+    plugins: [
+
+      MarkersPlugin,
+
+      VirtualTourPlugin.withConfig({
+        positionMode : 'manual',
+        renderMode   : '3d',      // flèches 3D dans la scène
+
+        nodes: [
+          {
+            id       : 'scene-1',
+            panorama : 'pano1.jpg',
+            caption  : 'Scène 1',
+            links: [
+              {
+                nodeId   : 'scene-2',
+                position : { yaw: '0deg', pitch: '0deg' },  // ← à ajuster
+              },
+            ],
+            markers: [
+              {
+                id       : 'info-scene1',
+                position : { yaw: '90deg', pitch: '0deg' }, // ← à ajuster
+                html     : '📍',
+                size     : { width: 40, height: 40 },
+                tooltip  : 'Point d\'info — scène 1',
+                content  : '<h3>Scène 1</h3><p>Texte libre, image, HTML...</p>',
+              },
+            ],
+          },
+
+          {
+            id       : 'scene-2',
+            panorama : 'pano2.jpg',
+            caption  : 'Scène 2',
+            links: [
+              {
+                nodeId   : 'scene-2-retour',   // lien retour vers scène 1
+                nodeId   : 'scene-1',
+                position : { yaw: '180deg', pitch: '0deg' }, // ← à ajuster
+              },
+            ],
+            markers: [
+              {
+                id       : 'info-scene2',
+                position : { yaw: '270deg', pitch: '0deg' }, // ← à ajuster
+                html     : '📍',
+                size     : { width: 40, height: 40 },
+                tooltip  : 'Point d\'info — scène 2',
+                content  : '<h3>Scène 2</h3><p>Texte libre...</p>',
+              },
+            ],
+          },
+        ],
+      }),
+    ],
+  });
+
+  // ─── OUTIL DE POSITIONNEMENT ───────────────────────────────────────────────
+  // Clique n'importe où dans le viewer → affiche yaw/pitch dans la console
+  // Utilise ces valeurs pour ajuster les positions des links et markers ci-dessus
+  viewer.addEventListener('click', ({ data }) => {
+    console.log(`yaw: '${Math.round(data.yaw * 180 / Math.PI)}deg',  pitch: '${Math.round(data.pitch * 180 / Math.PI)}deg'`);
+  });
+
+</script>
+
+</body>
+</html>
